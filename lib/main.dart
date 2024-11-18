@@ -14,12 +14,11 @@ class DocifyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return MaterialApp(
       initialRoute: "/",
       routes: {
-        "/": (context) => MainScreen(),
-        "/settings": (context) => const SecondScreen()
+        "/": (context) => SecondScreen(),
+        "/files": (context) => FilesScreen()
       },
       theme: ThemeData(
           appBarTheme: const AppBarTheme(
@@ -33,14 +32,14 @@ class DocifyApp extends StatelessWidget {
   }
 }
 
-class MainScreen extends StatefulWidget {
+class FilesScreen extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     return MainScreenState();
   }
 }
 
-class MainScreenState extends State<MainScreen> {
+class MainScreenState extends State<FilesScreen> {
   final DociFileManager dociFileManager = DociFileManager();
 
   @override
@@ -58,9 +57,7 @@ class MainScreenState extends State<MainScreen> {
       drawer: NavBar(),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await dociFileManager.addFile(
-              'new_file_${DateTime.now().millisecondsSinceEpoch}.txt',
-              'File content');
+          uploadFile(context, dociFileManager);
         },
         child: const Icon(Icons.edit_document),
       ),
@@ -68,8 +65,11 @@ class MainScreenState extends State<MainScreen> {
           stream: dociFileManager.fileStream,
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
+              print("Файлов нету");
               return Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  color: Colors.red,
+                ),
               );
             }
 
@@ -107,6 +107,7 @@ class SecondScreen extends StatelessWidget {
         appBar: AppBar(
           title: const Text("Docify - Ваши документы"),
         ),
+        drawer: NavBar(),
         body: Center(
           child: ElevatedButton(
             child: const Text('Open route'),

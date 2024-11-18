@@ -16,11 +16,14 @@ class NavBar extends StatelessWidget {
           ListTile(
             title: Text("Загрузка"),
             trailing: Icon(Icons.upload_file),
+            onTap: () => Navigator.pushNamed(context, "/"),
           ),
           Divider(),
           ListTile(
             title: Text("Мои файлы"),
             trailing: Icon(Icons.filter_drama_outlined),
+            onTap: () => Navigator.pushNamed(context, "/files"),
+
           )
         ],
       ),

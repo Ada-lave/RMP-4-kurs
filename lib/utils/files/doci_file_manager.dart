@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:path_provider/path_provider.dart';
 
@@ -44,5 +45,15 @@ class DociFileManager {
   Future<void> deleteFile(File file) async {
     await file.delete();
     _loadFiles();
+  }
+
+  Future<void> addByteFile(String fileName, Uint8List content) async{
+    final path = await _getDirPath();
+    final file = File('${path}/${fileName}');
+
+    file.writeAsBytes(content);
+
+    _files.add(file);
+    _fileController.add(_files);
   }
 }
