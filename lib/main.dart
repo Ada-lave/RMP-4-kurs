@@ -1,9 +1,13 @@
 import 'dart:io';
 
+import 'package:docfiy/db/database_base.dart';
+import 'package:docfiy/db/models/statistic.dart';
+import 'package:docfiy/db/sqlite.dart';
 import 'package:docfiy/utils/files/doci_file_manager.dart';
 import 'package:docfiy/utils/files/upload_file.dart';
 import 'package:flutter/material.dart';
 import 'components/nav_bar.dart';
+import 'dart:io' show Platform;
 
 void main() {
   runApp(const DocifyApp());
@@ -41,6 +45,7 @@ class FilesScreen extends StatefulWidget {
 
 class MainScreenState extends State<FilesScreen> {
   final DociFileManager dociFileManager = DociFileManager();
+  final DatabaseService db = getDatabase();
 
   @override
   void dispose() {
@@ -57,7 +62,8 @@ class MainScreenState extends State<FilesScreen> {
       drawer: NavBar(),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          uploadFile(context, dociFileManager);
+          db.insert(Statistic(0, 1232, DateTime.now(), DateTime.now()));
+          // uploadFile(context, dociFileManager);
         },
         child: const Icon(Icons.edit_document),
       ),
@@ -116,5 +122,13 @@ class SecondScreen extends StatelessWidget {
             },
           ),
         ));
+  }
+}
+
+DatabaseService getDatabase() {
+  if (Platform.isAndroid) {
+    return SqliteDatabase();
+  } else {
+    return SqliteDatabase();
   }
 }
