@@ -23,7 +23,7 @@ class SqliteDatabase implements DatabaseService {
       version: 1,
       onCreate: (Database db, int version) async => {
         await db.execute('''
-        CREATE TABLE IF NOT EXSISTS statistics (
+        CREATE TABLE IF NOT EXISTS statistics (
           id INTEGER PRIMARY KEY,
           file_size INTEGER NOT NULL,
           start_at DATE NOT NULL,

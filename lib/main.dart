@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:docfiy/components/nav_bar_item.dart';
+import 'package:docfiy/components/statistics/bar_statistic.dart';
 import 'package:docfiy/db/database_base.dart';
 import 'package:docfiy/db/models/statistic.dart';
 import 'package:docfiy/db/postgres.dart';
@@ -11,7 +12,10 @@ import 'package:flutter/material.dart';
 import 'components/nav_bar.dart';
 import 'dart:io' show Platform;
 
-List<NavBarItem> menu = [NavBarItem("Мои файлы", "/"), NavBarItem("Статистика", "/statistics")];
+List<NavBarItem> menu = [
+  NavBarItem("Мои файлы", "/files", Icon(Icons.upload_file)),
+  NavBarItem("Статистика", "/statistics", Icon(Icons.bar_chart))
+];
 
 void main() {
   runApp(const DocifyApp());
@@ -25,7 +29,7 @@ class DocifyApp extends StatelessWidget {
     return MaterialApp(
       initialRoute: "/files",
       routes: {
-        "/statistics": (context) => SecondScreen(),
+        "/statistics": (context) => StatisticScreen(),
         "/files": (context) => FilesScreen()
       },
       theme: ThemeData(
@@ -111,8 +115,21 @@ class MainScreenState extends State<FilesScreen> {
   }
 }
 
-class SecondScreen extends StatelessWidget {
+class StatisticScreen extends StatefulWidget {
+  @override
+  _StatisticScreenState createState() => _StatisticScreenState();
+}
+
+class _StatisticScreenState extends State<StatisticScreen> {
   final DatabaseService db = getDatabase();
+  late Future<List<Statistic>?> data;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    data = db.selectAll();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,14 +138,28 @@ class SecondScreen extends StatelessWidget {
           title: const Text("Docify - Ваши документы"),
         ),
         drawer: NavBar(items: menu),
-        body: Center(
-          child: ElevatedButton(
-            child: const Text('Open route'),
-            onPressed: () async {
-              print(await db.selectAll());
-            },
-          ),
-        ));
+        body: FutureBuilder(
+            future: data,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text("Ошибка загрузки данных"));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Center(child: Text("Данных пока нет"));
+              } else {
+                var groupedData = groupStatisticsByDay(snapshot.data!);
+                return Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: 300,
+                    ),
+                    child: BarStatistic(data: groupedData),
+                  ),
+                );
+              }
+            }));
   }
 }
 

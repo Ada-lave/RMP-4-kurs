@@ -19,7 +19,7 @@ class NavBar extends StatelessWidget {
           ...items.expand((item) => [
             ListTile(
             title: Text(item.name),
-            trailing: Icon(Icons.upload_file),
+            trailing: item.ico,
             onTap: () => Navigator.pushNamed(context, item.route)), 
             Divider()
             ]).toList()
