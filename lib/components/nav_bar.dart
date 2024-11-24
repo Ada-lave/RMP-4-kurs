@@ -1,7 +1,10 @@
+import 'package:docfiy/components/nav_bar_item.dart';
 import 'package:flutter/material.dart';
 
 class NavBar extends StatelessWidget {
-  const NavBar({super.key});
+  const NavBar({super.key, required this.items});
+
+  final List<NavBarItem> items;
 
   @override
   Widget build(BuildContext context) {
@@ -13,18 +16,13 @@ class NavBar extends StatelessWidget {
             child: Text("Меню"),
             decoration: BoxDecoration(color: Colors.blue),
           ),
-          ListTile(
-            title: Text("Загрузка"),
+          ...items.expand((item) => [
+            ListTile(
+            title: Text(item.name),
             trailing: Icon(Icons.upload_file),
-            onTap: () => Navigator.pushNamed(context, "/"),
-          ),
-          Divider(),
-          ListTile(
-            title: Text("Мои файлы"),
-            trailing: Icon(Icons.filter_drama_outlined),
-            onTap: () => Navigator.pushNamed(context, "/files"),
-
-          )
+            onTap: () => Navigator.pushNamed(context, item.route)), 
+            Divider()
+            ]).toList()
         ],
       ),
     );

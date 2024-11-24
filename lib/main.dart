@@ -1,13 +1,17 @@
 import 'dart:io';
 
+import 'package:docfiy/components/nav_bar_item.dart';
 import 'package:docfiy/db/database_base.dart';
 import 'package:docfiy/db/models/statistic.dart';
+import 'package:docfiy/db/postgres.dart';
 import 'package:docfiy/db/sqlite.dart';
 import 'package:docfiy/utils/files/doci_file_manager.dart';
 import 'package:docfiy/utils/files/upload_file.dart';
 import 'package:flutter/material.dart';
 import 'components/nav_bar.dart';
 import 'dart:io' show Platform;
+
+List<NavBarItem> menu = [NavBarItem("Мои файлы", "/"), NavBarItem("Статистика", "/statistics")];
 
 void main() {
   runApp(const DocifyApp());
@@ -19,9 +23,9 @@ class DocifyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: "/",
+      initialRoute: "/files",
       routes: {
-        "/": (context) => SecondScreen(),
+        "/statistics": (context) => SecondScreen(),
         "/files": (context) => FilesScreen()
       },
       theme: ThemeData(
@@ -59,10 +63,13 @@ class MainScreenState extends State<FilesScreen> {
       appBar: AppBar(
         title: const Text("Docify - Ваши документы"),
       ),
-      drawer: NavBar(),
+      drawer: NavBar(items: menu),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          db.insert(Statistic(0, 1232, DateTime.now(), DateTime.now()));
+          print(await db.insert(Statistic(
+              fileSize: 1232,
+              startAt: DateTime.now().toString(),
+              endAt: DateTime.now().toString())));
           // uploadFile(context, dociFileManager);
         },
         child: const Icon(Icons.edit_document),
@@ -105,7 +112,7 @@ class MainScreenState extends State<FilesScreen> {
 }
 
 class SecondScreen extends StatelessWidget {
-  const SecondScreen({super.key});
+  final DatabaseService db = getDatabase();
 
   @override
   Widget build(BuildContext context) {
@@ -113,12 +120,12 @@ class SecondScreen extends StatelessWidget {
         appBar: AppBar(
           title: const Text("Docify - Ваши документы"),
         ),
-        drawer: NavBar(),
+        drawer: NavBar(items: menu),
         body: Center(
           child: ElevatedButton(
             child: const Text('Open route'),
-            onPressed: () {
-              // Navigate to second route when tapped.
+            onPressed: () async {
+              print(await db.selectAll());
             },
           ),
         ));
@@ -129,6 +136,8 @@ DatabaseService getDatabase() {
   if (Platform.isAndroid) {
     return SqliteDatabase();
   } else {
-    return SqliteDatabase();
+    final db = PostgreDatabase("localhost", 5432, "pg", "pg", "statistic");
+    db.init();
+    return db;
   }
 }

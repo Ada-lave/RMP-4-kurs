@@ -1,22 +1,17 @@
 class Statistic {
-  int id;
-  double fileSize;
-  DateTime startAt;
-  DateTime endAt;
+  int? id;
+  int fileSize;
+  String startAt;
+  String endAt;
 
-  Statistic(this.id, this.fileSize, this.startAt, this.endAt);
+  Statistic({this.id, required this.fileSize, required this.startAt, required this.endAt});
 
   Map<String, Object?> toMap() {
-    return {
-      "id": id,
-      "file_size": fileSize,
-      "start_at": startAt,
-      "end_at": endAt
-    };
+    return {"file_size": fileSize, "start_at": startAt, "end_at": endAt};
   }
 
   static Statistic fromMap(Map<String, dynamic> map) {
     return Statistic(
-        map['id'], map['file_size'], map['start_at'], map['end_at']);
+        id: map["id"], fileSize: map['file_size'], startAt: map['start_at'], endAt: map['end_at']);
   }
 }
