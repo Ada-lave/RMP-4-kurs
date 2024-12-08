@@ -30,7 +30,7 @@ class DociFileManager {
 
   Future<void> addFile(String fileName, String content) async {
     final path = await _getDirPath();
-    final file = File('${path}/${fileName}');
+    final file = File('$path/$fileName');
 
     file.writeAsString(content);
 
@@ -49,7 +49,7 @@ class DociFileManager {
 
   Future<void> addByteFile(String fileName, Uint8List content) async{
     final path = await _getDirPath();
-    final file = File('${path}/${fileName}');
+    final file = File('$path/$fileName');
 
     file.writeAsBytes(content);
 

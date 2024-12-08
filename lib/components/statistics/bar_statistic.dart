@@ -21,7 +21,7 @@ Map<String, int> groupStatisticsByDay(List<Statistic> statistics) {
 class BarStatistic extends StatelessWidget {
   final Map<String, int> data;
 
-  const BarStatistic({required this.data});
+  const BarStatistic({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -47,15 +47,15 @@ class BarStatistic extends StatelessWidget {
               BarChartRodData(
                 toY: count.toDouble(),
                 color: Colors.blue,
-                width: 16,
-                borderRadius: BorderRadius.circular(4),
+                width: 24,
+                borderRadius: BorderRadius.circular(0),
               )
             ],
           );
         }).toList(),
         titlesData: FlTitlesData(
-          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
@@ -63,17 +63,21 @@ class BarStatistic extends StatelessWidget {
                 int index = value.toInt();
                 if (index >= 0 && index < dates.length) {
                   return SideTitleWidget(
-                      child: Text(dates[index]),
-                      axisSide: meta.axisSide); // Показываем дни на оси X
+                      axisSide: meta.axisSide,
+                      child: Text(
+                        dates[index],
+                        style: TextStyle(fontSize: 12),
+                      )); // Показываем дни на оси X
                 }
                 return SideTitleWidget(
-                    child: Text(""), axisSide: meta.axisSide);
+                    axisSide: meta.axisSide,
+                    child: Text(""));
               },
             ),
           ),
         ),
         borderData: FlBorderData(show: true),
-        gridData: FlGridData(show: true),
+        gridData: const FlGridData(show: true),
       ),
     );
   }

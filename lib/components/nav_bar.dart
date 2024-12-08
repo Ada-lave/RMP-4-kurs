@@ -12,17 +12,22 @@ class NavBar extends StatelessWidget {
     return Drawer(
       child: ListView(
         children: [
-          DrawerHeader(
-            child: Text("Меню"),
+          const DrawerHeader(
             decoration: BoxDecoration(color: Colors.blue),
+            child: Text(
+              "Меню",
+              style: TextStyle(color: Colors.white, fontSize: 24),
+            ),
           ),
-          ...items.expand((item) => [
-            ListTile(
-            title: Text(item.name),
-            trailing: item.ico,
-            onTap: () => Navigator.pushNamed(context, item.route)), 
-            Divider()
-            ]).toList()
+          ...items
+              .expand((item) => [
+                    ListTile(
+                        title: Text(item.name),
+                        trailing: item.ico,
+                        onTap: () => Navigator.pushNamed(context, item.route)),
+                    const Divider()
+                  ])
+              
         ],
       ),
     );

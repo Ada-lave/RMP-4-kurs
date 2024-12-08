@@ -25,7 +25,7 @@ Future<void> uploadFile(BuildContext context, DociFileManager doci) async {
       if (response.statusCode == 200) {
         showSnackBar(context, "Успешно", Colors.green);
         var fileData = await response.stream.toBytes();
-        await doci.addByteFile("${file.path.split("\\").last}", fileData);
+        await doci.addByteFile(file.path.split("\\").last, fileData);
       } else {
         showSnackBar(context, "Ошибка сети", Colors.red);
       }

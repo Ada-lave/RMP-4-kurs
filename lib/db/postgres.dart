@@ -84,6 +84,6 @@ class PostgreDatabase implements DatabaseService {
             username: user,
             password: password,
             port: port),
-        settings: ConnectionSettings(sslMode: SslMode.disable));
+        settings: const ConnectionSettings(sslMode: SslMode.disable));
   }
 }

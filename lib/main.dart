@@ -9,12 +9,13 @@ import 'package:docfiy/db/sqlite.dart';
 import 'package:docfiy/utils/files/doci_file_manager.dart';
 import 'package:docfiy/utils/files/upload_file.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'components/nav_bar.dart';
 import 'dart:io' show Platform;
 
 List<NavBarItem> menu = [
-  NavBarItem("Мои файлы", "/files", Icon(Icons.upload_file)),
-  NavBarItem("Статистика", "/statistics", Icon(Icons.bar_chart))
+  NavBarItem("Мои файлы", "/files", const Icon(Icons.upload_file)),
+  NavBarItem("Статистика", "/statistics", const Icon(Icons.bar_chart))
 ];
 
 void main() {
@@ -39,12 +40,14 @@ class DocifyApp extends StatelessWidget {
           ),
           floatingActionButtonTheme: FloatingActionButtonThemeData(
               backgroundColor: Colors.blueAccent[200], iconSize: 30),
-          drawerTheme: DrawerThemeData()),
+          drawerTheme: const DrawerThemeData()),
     );
   }
 }
 
 class FilesScreen extends StatefulWidget {
+  const FilesScreen({super.key});
+
   @override
   State<StatefulWidget> createState() {
     return MainScreenState();
@@ -83,10 +86,8 @@ class MainScreenState extends State<FilesScreen> {
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               print("Файлов нету");
-              return Center(
-                child: CircularProgressIndicator(
-                  color: Colors.red,
-                ),
+              return const Center(
+                child: CircularProgressIndicator(),
               );
             }
 
@@ -96,19 +97,24 @@ class MainScreenState extends State<FilesScreen> {
                 itemBuilder: (context, index) {
                   return ListTile(
                     title: Text(files[index].path.split("/").last),
-                    subtitle: Text("Размер 156КБ"),
-                    subtitleTextStyle: TextStyle(
+                    subtitle: const Text("Размер 156КБ"),
+                    subtitleTextStyle: const TextStyle(
                       fontSize: 12,
                       color: Colors.grey,
                     ),
-                    leading: Icon(Icons.file_present),
+                    leading: const Icon(Icons.file_present),
                     trailing: IconButton(
                       onPressed: () => dociFileManager.deleteFile(files[index]),
-                      icon: Icon(Icons.delete),
+                      icon: const Icon(Icons.delete),
                     ),
+                    onTap: () async {
+                      if (await canLaunchUrl(files[index].uri)) {
+                        await launchUrl(files[index].uri);
+                      }
+                    },
                   );
                 },
-                separatorBuilder: (context, index) => Divider(),
+                separatorBuilder: (context, index) => const Divider(),
                 itemCount: files.length);
           }),
     );
@@ -116,6 +122,8 @@ class MainScreenState extends State<FilesScreen> {
 }
 
 class StatisticScreen extends StatefulWidget {
+  const StatisticScreen({super.key});
+
   @override
   _StatisticScreenState createState() => _StatisticScreenState();
 }
@@ -135,28 +143,34 @@ class _StatisticScreenState extends State<StatisticScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Docify - Ваши документы"),
+          title: const Text("Docify - Статистика"),
         ),
         drawer: NavBar(items: menu),
         body: FutureBuilder(
             future: data,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
-                return Center(child: Text("Ошибка загрузки данных"));
+                return const Center(child: Text("Ошибка загрузки данных"));
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Center(child: Text("Данных пока нет"));
+                return const Center(child: Text("Данных пока нет"));
               } else {
                 var groupedData = groupStatisticsByDay(snapshot.data!);
-                return Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: 300,
+                int lenght = snapshot.data!.length;
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxHeight: 300,
+                        ),
+                        child: BarStatistic(data: groupedData),
+                      ),
                     ),
-                    child: BarStatistic(data: groupedData),
-                  ),
+                    ListTile(title: Text("Общее количество: $lenght")),
+                  ],
                 );
               }
             }));
