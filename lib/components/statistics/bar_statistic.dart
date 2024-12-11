@@ -66,12 +66,12 @@ class BarStatistic extends StatelessWidget {
                       axisSide: meta.axisSide,
                       child: Text(
                         dates[index],
-                        style: TextStyle(fontSize: 12),
+                        style: const TextStyle(fontSize: 12),
                       )); // Показываем дни на оси X
                 }
                 return SideTitleWidget(
                     axisSide: meta.axisSide,
-                    child: Text(""));
+                    child: const Text(""));
               },
             ),
           ),

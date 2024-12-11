@@ -6,7 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 
-Future<void> uploadFile(BuildContext context, DociFileManager doci) async {
+Future<File?> uploadFile(BuildContext context, DociFileManager doci) async {
   FilePickerResult? result = await FilePicker.platform.pickFiles();
 
   if (result != null) {
@@ -16,8 +16,7 @@ Future<void> uploadFile(BuildContext context, DociFileManager doci) async {
 
     try {
       var request = MultipartRequest(
-          "POST", Uri.parse("http://localhost:8080/api/format/docx"));
-      request.fields.addAll({"add_spaces_beetween_image_text": "true"});
+          "POST", Uri.parse("http://localhost:8000/process-docx/"));
       request.files.add(await MultipartFile.fromPath("file", file.path));
 
       var response = await request.send();
@@ -29,8 +28,11 @@ Future<void> uploadFile(BuildContext context, DociFileManager doci) async {
       } else {
         showSnackBar(context, "Ошибка сети", Colors.red);
       }
+      return file;
     } catch (e) {
       showSnackBar(context, "Ошибка загрузки", Colors.red);
     }
   }
+
+  return null;
 }
