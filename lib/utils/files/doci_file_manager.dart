@@ -24,7 +24,10 @@ class DociFileManager {
   Future<void> _loadFiles() async {
     final path = await _getDirPath();
     final dir = Directory(path);
-    _files = dir.listSync().whereType<File>().toList();
+    _files = dir.listSync().whereType<File>().where((file) {
+      final extension = file.path.split('.').last.toLowerCase();
+      return extension == 'docx' || extension == 'doc';
+    }).toList();
     _fileController.add(_files);
   }
 

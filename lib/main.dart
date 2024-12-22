@@ -9,6 +9,7 @@ import 'package:docfiy/db/sqlite.dart';
 import 'package:docfiy/utils/files/doci_file_manager.dart';
 import 'package:docfiy/utils/files/upload_file.dart';
 import 'package:flutter/material.dart';
+import 'package:open_file_plus/open_file_plus.dart';
 import 'package:path/path.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'components/nav_bar.dart';
@@ -76,9 +77,15 @@ class MainScreenState extends State<FilesScreen> {
         onPressed: () async {
           var startAt = DateTime.now();
           File? res = await uploadFile(context, dociFileManager);
-          var endAt = DateTime.now();
-          var stats = await res?.stat();
-          db.insert(Statistic(fileSize: stats!.size, startAt: startAt.toString(), endAt: endAt.toString()));
+
+          if (res != null) {
+            var endAt = DateTime.now();
+            var stats = await res.stat();
+            db.insert(Statistic(
+                fileSize: stats.size,
+                startAt: startAt.toString(),
+                endAt: endAt.toString()));
+          }
         },
         child: const Icon(Icons.edit_document),
       ),
@@ -112,7 +119,8 @@ class MainScreenState extends State<FilesScreen> {
                     }
 
                     final fileStat = snapshot.data!;
-                    final sizeInKB = (fileStat.size / 1024).toStringAsFixed(2); // Размер в КБ
+                    final sizeInKB = (fileStat.size / 1024)
+                        .toStringAsFixed(2); // Размер в КБ
                     return ListTile(
                       title: Text(basename(file.path)),
                       subtitle: Text("Размер: $sizeInKB КБ"),
@@ -122,10 +130,17 @@ class MainScreenState extends State<FilesScreen> {
                         icon: const Icon(Icons.delete),
                       ),
                       onTap: () async {
-                      if (await canLaunchUrl(files[index].uri)) {
-                        await launchUrl(files[index].uri);
-                      }
-                    },
+                        try {
+                          final result = await OpenFile.open(file.path);
+
+                          if (result.type != ResultType.done) {
+                            debugPrint(
+                                'Ошибка при открытии файла: ${result.message}');
+                          }
+                        } catch (e) {
+                          debugPrint('Ошибка: $e');
+                        }
+                      },
                     );
                   },
                 );
