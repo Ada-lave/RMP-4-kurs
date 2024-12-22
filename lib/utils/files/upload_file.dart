@@ -16,7 +16,7 @@ Future<File?> uploadFile(BuildContext context, DociFileManager doci) async {
 
     try {
       var request = MultipartRequest(
-          "POST", Uri.parse("http://localhost:8000/process-docx/"));
+          "POST", Uri.parse("http://178.250.157.85:9000/process-docx/"));
       request.files.add(await MultipartFile.fromPath("file", file.path));
 
       var response = await request.send();
@@ -31,7 +31,7 @@ Future<File?> uploadFile(BuildContext context, DociFileManager doci) async {
       }
       return file;
     } catch (e) {
-      showSnackBar(context, "Ошибка загрузки", Colors.red);
+      showSnackBar(context, "Ошибка загрузки" + e.toString(), Colors.red);
     }
   }
 
