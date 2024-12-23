@@ -15,7 +15,8 @@ import 'components/nav_bar.dart';
 import 'dart:io' show Platform;
 
 List<NavBarItem> menu = [
-  NavBarItem("Мои файлы", "/files", const Icon(Icons.upload_file)),
+  NavBarItem("Мои doc", "/doc_files", const Icon(Icons.document_scanner)),
+  NavBarItem("Мои pdf", "/pdf_files", const Icon(Icons.picture_as_pdf)),
   NavBarItem("Статистика", "/statistics", const Icon(Icons.bar_chart))
 ];
 
@@ -29,25 +30,51 @@ class DocifyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: "/files",
+      initialRoute: "/doc_files",
       routes: {
         "/statistics": (context) => const StatisticScreen(),
-        "/files": (context) => const FilesScreen()
+        "/doc_files": (context) => FilesScreen(fileExt: "doc"),
+        "/pdf_files": (context) => FilesScreen(fileExt: "pdf"),
       },
       theme: ThemeData(
-          appBarTheme: const AppBarTheme(
-            color: Colors.blue,
-            titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
+        appBarTheme: const AppBarTheme(
+          color: Colors.blue,
+          titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+            backgroundColor: Colors.blueAccent[200], iconSize: 30),
+        drawerTheme: const DrawerThemeData(),
+        dialogTheme: DialogTheme(
+          backgroundColor: Colors.blue[50],
+          titleTextStyle: TextStyle(color: Colors.blue[900], fontSize: 20),
+          contentTextStyle: TextStyle(color: Colors.blue[700], fontSize: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
           ),
-          floatingActionButtonTheme: FloatingActionButtonThemeData(
-              backgroundColor: Colors.blueAccent[200], iconSize: 30),
-          drawerTheme: const DrawerThemeData()),
+        ),
+        checkboxTheme: CheckboxThemeData(
+          fillColor: WidgetStateProperty.all(Colors.blueAccent[200]),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.all(Colors.blueAccent[200]),
+            foregroundColor: WidgetStateProperty.all(Colors.white),
+            textStyle: WidgetStateProperty.all(TextStyle(fontSize: 16)),
+            shape: WidgetStateProperty.all(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
 
 class FilesScreen extends StatefulWidget {
-  const FilesScreen({super.key});
+  final String fileExt; 
+  FilesScreen({required this.fileExt, super.key});
 
   @override
   State<StatefulWidget> createState() {
@@ -58,10 +85,13 @@ class FilesScreen extends StatefulWidget {
 class MainScreenState extends State<FilesScreen> {
   final DociFileManager dociFileManager = DociFileManager();
   final DatabaseService db = getDatabase();
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = "";
 
   @override
   void dispose() {
     dociFileManager.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -70,6 +100,28 @@ class MainScreenState extends State<FilesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Docify - Ваши документы"),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48.0),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                  hintText: 'Поиск по названию файла',
+                  prefixIcon: const Icon(Icons.search),
+                  hintStyle: const TextStyle(color: Colors.white),
+                  focusColor: Colors.blue,
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  )),
+              onChanged: (query) {
+                setState(() {
+                  _searchQuery = query;
+                });
+              },
+            ),
+          ),
+        ),
       ),
       drawer: NavBar(items: menu),
       floatingActionButton: FloatingActionButton(
@@ -77,7 +129,9 @@ class MainScreenState extends State<FilesScreen> {
           await showDialog(
               context: context,
               builder: (BuildContext context) {
-                return FormDialog(db: db,);
+                return FormDialog(
+                  db: db,
+                );
               });
           dociFileManager.updateFileStream();
         },
@@ -96,7 +150,21 @@ class MainScreenState extends State<FilesScreen> {
               );
             }
 
-            final files = snapshot.data!;
+            final files = snapshot.data!.where((file) {
+              final fileName = basename(file.path)
+                  .toLowerCase()
+                  .contains((_searchQuery.toLowerCase()));
+              return fileName && file.path.split(Platform.pathSeparator).last.contains(widget.fileExt);
+            }).toList();
+
+            if (files.isEmpty) {
+              return const Center(
+                child: Text(
+                  "Файлы не найдены.",
+                  style: TextStyle(fontSize: 18),
+                ),
+              );
+            }
 
             return ListView.separated(
               itemBuilder: (context, index) {

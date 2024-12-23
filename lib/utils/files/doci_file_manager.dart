@@ -28,7 +28,7 @@ class DociFileManager {
     final dir = Directory(path);
     _files = dir.listSync().whereType<File>().where((file) {
       final extension = file.path.split('.').last.toLowerCase();
-      return extension == 'docx' || extension == 'doc';
+      return extension == 'docx' || extension == 'doc' || extension == 'pdf';
     }).toList();
     _fileController.add(_files);
   }

@@ -73,7 +73,7 @@ class _FormDialogState extends State<FormDialog> {
                 }
                 Navigator.pop(context);
               },
-              child: Text('Отправить'),
+              child: Text('Выбрать файл'),
             ),
           ],
         ),
