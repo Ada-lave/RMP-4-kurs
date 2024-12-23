@@ -6,7 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 
-Future<File?> uploadFile(BuildContext context, DociFileManager doci) async {
+Future<File?> uploadFile(BuildContext context, DociFileManager doci, bool formatTop, bool formatBot, bool convertToPdf) async {
   FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ["docx", "doc"]);
 
   if (result != null) {
@@ -25,7 +25,7 @@ Future<File?> uploadFile(BuildContext context, DociFileManager doci) async {
         showSnackBar(context, "Успешно", Colors.green);
         var fileData = await response.stream.toBytes();
         String fileName = file.path.split(Platform.pathSeparator).last;
-        await doci.addByteFile(fileName, fileData);
+        await doci.addByteFile(context, fileName, fileData);
       } else {
         showSnackBar(context, "Ошибка сети", Colors.red);
       }

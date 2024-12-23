@@ -13,7 +13,7 @@ class PostgreDatabase implements DatabaseService {
 
   Future<void> init() async {
     final connection = await getConnection();
-    final result = await connection.execute('''
+    await connection.execute('''
           CREATE TABLE IF NOT EXISTS statistics (
           id SERIAL PRIMARY KEY,
           file_size INTEGER NOT NULL,
@@ -25,7 +25,7 @@ class PostgreDatabase implements DatabaseService {
   @override
   Future<void> delete(int id) async {
     final connection = await getConnection();
-    final result = await connection.execute(
+    await connection.execute(
       r'DELETE FROM statistics WHERE id = $1',
       parameters: [id],
     );

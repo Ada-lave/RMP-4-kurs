@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:docfiy/components/dialog_menu.dart';
 import 'package:docfiy/components/nav_bar_item.dart';
 import 'package:docfiy/components/statistics/bar_statistic.dart';
 import 'package:docfiy/db/database_base.dart';
@@ -7,11 +8,9 @@ import 'package:docfiy/db/models/statistic.dart';
 import 'package:docfiy/db/postgres.dart';
 import 'package:docfiy/db/sqlite.dart';
 import 'package:docfiy/utils/files/doci_file_manager.dart';
-import 'package:docfiy/utils/files/upload_file.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file_plus/open_file_plus.dart';
 import 'package:path/path.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'components/nav_bar.dart';
 import 'dart:io' show Platform;
 
@@ -75,17 +74,12 @@ class MainScreenState extends State<FilesScreen> {
       drawer: NavBar(items: menu),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          var startAt = DateTime.now();
-          File? res = await uploadFile(context, dociFileManager);
-
-          if (res != null) {
-            var endAt = DateTime.now();
-            var stats = await res.stat();
-            db.insert(Statistic(
-                fileSize: stats.size,
-                startAt: startAt.toString(),
-                endAt: endAt.toString()));
-          }
+          await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return FormDialog(db: db,);
+              });
+          dociFileManager.updateFileStream();
         },
         child: const Icon(Icons.edit_document),
       ),
@@ -196,7 +190,7 @@ class _StatisticScreenState extends State<StatisticScreen> {
                     padding: const EdgeInsets.all(16.0),
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(
-                        maxHeight: 300,
+                        maxHeight: 450,
                       ),
                       child: BarStatistic(data: groupedData),
                     ),

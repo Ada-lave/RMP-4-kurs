@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:docfiy/utils/snacks.dart';
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
 class DociFileManager {
@@ -31,14 +33,23 @@ class DociFileManager {
     _fileController.add(_files);
   }
 
-  Future<void> addFile(String fileName, String content) async {
+  Future<void> updateFileStream() async {
+    await _loadFiles();
+  }
+
+  Future<void> addFile(
+      BuildContext context, String fileName, String content) async {
     final path = await _getDirPath();
     final file = File('$path/$fileName');
 
     file.writeAsString(content);
 
-    _files.add(file);
-    _fileController.add(_files);
+    if (!_files.contains(file)) {
+      _files.add(file);
+      _fileController.add(_files);
+    } else {
+      showSnackBar(context, "Файл уже существует", Colors.blue);
+    }
   }
 
   void dispose() {
@@ -50,7 +61,8 @@ class DociFileManager {
     _loadFiles();
   }
 
-  Future<void> addByteFile(String fileName, Uint8List content) async{
+  Future<void> addByteFile(
+      BuildContext context, fileName, Uint8List content) async {
     final path = await _getDirPath();
     final file = File('$path/$fileName');
 
